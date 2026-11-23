@@ -23,6 +23,7 @@ struct droneSensors{
 
 droneSensors sensorData;
 
+uint8_t testmotor1 = 4;
 
 
 void setup() {
@@ -49,6 +50,10 @@ void setup() {
     while (true);
   }
   Serial.println("BNO055 detected!");
+
+
+  pinMode(testmotor1, OUTPUT);
+
 
   delay(1000);
 }
@@ -102,6 +107,13 @@ void loop() {
   // put your main code here, to run repeatedly:
   readBNO();
   readVL53();
+
+  digitalWrite(testmotor1, HIGH);
+
+  delay(500);
+
+  digitalWrite(testmotor1, LOW);
+
   delay(100);
 
 }
