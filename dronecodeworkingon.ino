@@ -1,13 +1,10 @@
 #include <Wire.h>
-
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
 #include <Adafruit_VL53L1X.h>
 
-
-#define IRQ_PIN 2
-#define XSHUT_PIN 3
-
+#define IRQ_PIN 25
+#define XSHUT_PIN 17
 
 //create sensor objects
 Adafruit_VL53L1X VL53 = Adafruit_VL53L1X(XSHUT_PIN, IRQ_PIN);
@@ -21,10 +18,17 @@ struct droneSensors{
   int altitude;
 };
 
+//initialize a dronesensors object
 droneSensors sensorData;
 
-uint8_t testmotor1 = 4;
-
+//create vars for motors
+uint8_t frontRightMotor = 4;
+uint8_t backRightMotor = 13;
+uint8_t backLeftMotor = 14;
+uint8_t frontLeftMotor = 16;
+//create vars for LEDs
+uint8_t greenLED = 21;
+uint8_t redLED = 26;
 
 void setup() {
   Serial.begin(115200);
@@ -32,10 +36,23 @@ void setup() {
 
   Serial.println("Starting sensors...");
 
+  //set pinmodes for outputs
+  pinMode(frontRightMotor, OUTPUT);
+  pinMode(backRightMotor, OUTPUT);
+  pinMode(backLeftMotor, OUTPUT);
+  pinMode(frontLeftMotor, OUTPUT);
+  pinMode(greenLED, OUTPUT);
+  pinMode(redLED, OUTPUT);
+
   //initialize the VL53L1X
   if (!VL53.begin(0x29, &Wire)){
     Serial.println("VL53L1X not detected!");
     Serial.println(VL53.vl_status);
+    //quick flash red means VL53L1X calibrating
+    digitalWrite(redLED, HIGH);
+    delay(20)
+    digitalWrite(redLED, LOW);
+      
     while (true); //keep checking until sensor begins
   }
   Serial.println("VL53L1x detected!");
@@ -47,15 +64,22 @@ void setup() {
   //initialize the BNO055
   if (!BNO.begin()){
     Serial.println("No BNO055 detected");
+
+    //quick flash green means BNO getting setup
+    digitalWrite(greenLED, HIGH);
+    delay(20)
+    digitalWrite(greenLED, LOW);
     while (true);
   }
   Serial.println("BNO055 detected!");
-
-
-  pinMode(testmotor1, OUTPUT);
-
+  
 
   delay(1000);
+    
+  //green LED on, no red LED ==== setup complete
+  digitalWrite(greenLED, HIGH);
+  digitalWrite(redLED, LOW);
+  
 }
 
 void readBNO(){
@@ -100,19 +124,10 @@ void readVL53(){
 
 
 
-
-
-
 void loop() {
   // put your main code here, to run repeatedly:
   readBNO();
   readVL53();
-
-  digitalWrite(testmotor1, HIGH);
-
-  delay(500);
-
-  digitalWrite(testmotor1, LOW);
 
   delay(100);
 
